@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>YoSinTV Link Manager</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;500&family=DM+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root{
+  --bg:#0d0d0d;
+  --surface:#151515;
+  --surface2:#1c1c1c;
+  --surface3:#222;
+  --border:rgba(255,255,255,.08);
+  --border2:rgba(255,255,255,.15);
+  --text:#ececec;
+  --text2:#a1a1a1;
+  --text3:#666;
+  --green:#4ade80;
+  --red:#f87171;
+  --amber:#facc15;
+  --mono:"DM Mono","Consolas",monospace;
+}
+
+body{
+  font-family:"DM Sans",sans-serif;
+  font-weight:300;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+}
+
+.wrap{
+  max-width:1200px;
+  width:100%;
+  margin:0 auto;
+  padding:20px;
+}
+
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:18px;
+  flex-wrap:wrap;
+}
+
+.brand{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+}
+
+.brand-name{
+  font-size:14px;
+  font-weight:500;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+
+.brand-sub{
+  font-size:11px;
+  color:var(--text3);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+
+.topbar-actions{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+.sep{
+  width:1px;
+  height:14px;
+  background:var(--border);
+}
+
+.pill,
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text2);
+  cursor:pointer;
+  text-decoration:none;
+  transition:.15s ease;
+}
+
+.pill{
+  padding:7px 11px;
+  border-radius:5px;
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.btn{
+  width:100%;
+  padding:10px 14px;
+  border-radius:5px;
+  font-size:12px;
+  font-weight:500;
+}
+
+.pill:hover,
+.btn:hover{
+  border-color:var(--border2);
+  color:var(--text);
+  background:var(--surface2);
+}
+
+.pill.danger:hover{
+  color:var(--red);
+}
+
+.btn.primary{
+  border-color:rgba(74,222,128,.25);
+  color:var(--green);
+}
+
+.btn.primary:hover{
+  background:rgba(74,222,128,.08);
+}
+
+.btn:disabled{
+  opacity:.7;
+  cursor:not-allowed;
+}
+
+.btn.saving{
+  color:var(--amber);
+  border-color:rgba(250,204,21,.3);
+}
+
+.btn.saved{
+  color:var(--green);
+  border-color:rgba(74,222,128,.45);
+  background:rgba(74,222,128,.08);
+}
+
+.pill svg,
+.btn svg{
+  width:14px;
+  height:14px;
+  stroke:currentColor;
+  fill:none;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.panel{
+  border:1px solid var(--border);
+  background:var(--surface);
+}
+
+.toolbar{
+  display:flex;
+  gap:8px;
+  padding:12px;
+  border-bottom:1px solid var(--border);
+  flex-wrap:wrap;
+}
+
+select,
+input[type="text"]{
+  background:transparent;
+  color:var(--text);
+  border:1px solid var(--border);
+  padding:10px 12px;
+  font-size:13px;
+  border-radius:4px;
+  outline:none;
+  transition:.15s ease;
+}
+
+select:hover,
+input:hover{
+  border-color:var(--border2);
+}
+
+select:focus,
+input:focus{
+  border-color:var(--green);
+}
+
+select{
+  flex:1 1 300px;
+}
+
+#searchFile{
+  flex:1 1 160px;
+}
+
+#commitMessage{
+  flex:1 1 220px;
+}
+
+.editor-meta{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding:8px 12px;
+  border-bottom:1px solid var(--border);
+  background:#111;
+}
+
+.editor-filename{
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--text2);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.match-badge{
+  font-size:10px;
+  padding:3px 8px;
+  border-radius:999px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  font-weight:500;
+}
+
+.badge-live{
+  color:var(--green);
+  border:1px solid rgba(74,222,128,.25);
+}
+
+.badge-soon{
+  color:var(--amber);
+  border:1px solid rgba(250,204,21,.2);
+}
+
+.badge-over{
+  color:var(--text3);
+  border:1px solid var(--border);
+}
+
+.editor-wrap{
+  display:flex;
+  height:74vh;
+  background:#0d0d0d;
+}
+
+#lineNumbers{
+  min-width:50px;
+  padding:14px 10px;
+  text-align:right;
+  background:#111;
+  color:#555;
+  border-right:1px solid var(--border);
+  font-family:var(--mono);
+  font-size:12px;
+  line-height:1.65;
+  user-select:none;
+  overflow:hidden;
+  white-space:pre;
+}
+
+#editor{
+  flex:1;
+  background:#0d0d0d;
+  color:#e8e8e8;
+  border:none;
+  outline:none;
+  resize:none;
+  padding:14px;
+  font-family:var(--mono);
+  font-size:12.5px;
+  line-height:1.65;
+  tab-size:2;
+  white-space:pre;
+  overflow:auto;
+  caret-color:var(--green);
+}
+
+#editor::placeholder{
+  color:#555;
+}
+
+#editor::-webkit-scrollbar{
+  width:8px;
+  height:8px;
+}
+
+#editor::-webkit-scrollbar-thumb{
+  background:#2b2b2b;
+}
+
+.statusbar{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-top:1px solid var(--border);
+  background:#111;
+  color:var(--text3);
+  font-size:11px;
+}
+
+.status-dot{
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:#555;
+}
+
+.status-dot.ok{
+  background:var(--green);
+}
+
+.status-dot.err{
+  background:var(--red);
+}
+
+.action-bar{
+  position:fixed;
+  right:14px;
+  bottom:14px;
+  z-index:999;
+}
+
+.action-btns{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  width:190px;
+}
+
+@media(max-width:700px){
+  .wrap{
+    padding:12px;
+    max-width:100%;
+  }
+
+  .toolbar{
+    flex-direction:column;
+  }
+
+  select,
+  input{
+    width:100%;
+  }
+
+  .editor-wrap{
+    height:58vh;
+  }
+
+  .topbar-actions{
+    width:100%;
+  }
+
+  .pill{
+    flex:1;
+  }
+
+  .action-bar{
+    left:12px;
+    right:12px;
+    bottom:12px;
+  }
+
+  .action-btns{
+    width:100%;
+    flex-direction:column;
+  }
+
+  .btn{
+    width:100%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">
+      <span class="brand-name">YoSinTV</span>
+      <span class="brand-sub">Link Manager</span>
+    </div>
+
+    <div class="topbar-actions">
+      <a class="pill" href="https://sofax3.vercel.app/" target="_blank">Match Admin</a>
+      <div class="sep"></div>
+      <button class="pill" onclick="formatJson()">Format</button>
+      <button class="pill" onclick="clearEditor()">Clear</button>
+      <button class="pill danger" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="panel">
+
+    <div class="toolbar">
+      <select id="file" onchange="onFileChange()">
+        <option>Loading files...</option>
+      </select>
+
+      <input type="text"
+             id="searchFile"
+             placeholder="Filter..."
+             oninput="filterFiles()"
+             onkeydown="handleFilterEnter(event)" />
+
+      <input type="text"
+             id="commitMessage"
+             placeholder="Commit message..." />
+    </div>
+
+    <div class="editor-meta">
+      <span class="editor-filename" id="editorTitle">—</span>
+      <span id="matchBadge"></span>
+    </div>
+
+    <div class="editor-wrap">
+      <pre id="lineNumbers">1</pre>
+
+      <textarea
+        id="editor"
+        spellcheck="false"
+        placeholder="Select a file to begin..."
+        oninput="updateLineNumbers(); validateJsonLive();"
+        onscroll="syncScroll()"
+      ></textarea>
+    </div>
+
+    <div class="statusbar">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Ready</span>
+    </div>
+
+  </div>
+</div>
+
+<div class="action-bar">
+  <div class="action-btns">
+    <button class="btn" onclick="loadFile()">Load</button>
+    <button class="btn primary" id="saveBtn" onclick="saveFile()">Save to GitHub</button>
+  </div>
+</div>
+
+<script>
+const API_URL = "/api/github";
+
+const SOURCE_APIS = [
+  "https://yosintvapi.pages.dev/api/match-cricket.json",
+  "https://yosintvapi.pages.dev/api/match-football.json"
+];
+
+/* Globals */
+let allFiles = [];
+let matchTimeMap = {};
+
+const password =
+  localStorage.getItem("blog_admin_password") || "";
+
+if (!password)
+  window.location.href = "/admin/login.html";
+
+/* Storage */
+function getSavedFiles(){
+  return JSON.parse(
+    localStorage.getItem("blog_saved_files") || "{}"
+  );
+}
+
+function markFileSaved(f){
+  const s = getSavedFiles();
+  s[f] = Date.now();
+  localStorage.setItem(
+    "blog_saved_files",
+    JSON.stringify(s)
+  );
+}
+
+function timeAgo(t){
+  if(!t) return "";
+
+  const s = Math.floor((Date.now()-t)/1000);
+
+  if(s < 10) return "just now";
+  if(s < 60) return s + "s ago";
+
+  const m = Math.floor(s/60);
+
+  if(m < 60) return m + "m ago";
+
+  const h = Math.floor(m/60);
+
+  if(h < 24) return h + "h ago";
+
+  return Math.floor(h/24) + "d ago";
+}
+
+function getCurrentTimeText(){
+  const d = new Date();
+
+  return d.getFullYear() + "-" +
+  String(d.getMonth()+1).padStart(2,"0") + "-" +
+  String(d.getDate()).padStart(2,"0") + " " +
+  String(d.getHours()).padStart(2,"0") + ":" +
+  String(d.getMinutes()).padStart(2,"0");
+}
+
+function makeAutoCommitMessage(f){
+  return getCurrentTimeText() + " - " + f;
+}
+
+function setAutoCommit(){
+  const f = document.getElementById("file").value;
+
+  if(!f || f.includes("Loading")) return;
+
+  document.getElementById("commitMessage").value =
+    makeAutoCommitMessage(f);
+}
+
+/* Save button effect */
+function setSaveButtonState(state){
+  const btn =
+    document.getElementById("saveBtn");
+
+  if(!btn) return;
+
+  btn.classList.remove("saving","saved");
+
+  if(state === "saving"){
+    btn.disabled = true;
+    btn.classList.add("saving");
+    btn.innerText = "Saving...";
+  }else if(state === "saved"){
+    btn.disabled = false;
+    btn.classList.add("saved");
+    btn.innerText = "Saved ✅";
+
+    setTimeout(()=>{
+      btn.classList.remove("saved");
+      btn.innerText = "Save to GitHub";
+    },1500);
+  }else{
+    btn.disabled = false;
+    btn.innerText = "Save to GitHub";
+  }
+}
+
+/* Status */
+function setStatus(msg,type){
+  const dot =
+    document.getElementById("statusDot");
+
+  document.getElementById("statusText").innerText =
+    msg;
+
+  dot.className =
+    "status-dot" +
+    (type==="success"
+      ? " ok"
+      : type==="error"
+      ? " err"
+      : "");
+}
+
+/* Countdown */
+function getFileSortTime(f){
+  const m = matchTimeMap[f];
+
+  if(!m || !m.start)
+    return Number.MAX_SAFE_INTEGER;
+
+  const now = new Date();
+  const start = new Date(m.start);
+
+  const end =
+    new Date(
+      start.getTime() +
+      Number(m.duration||0)*3600000
+    );
+
+  if(now >= start && now <= end)
+    return -1;
+
+  if(now < start)
+    return start - now;
+
+  return Number.MAX_SAFE_INTEGER - 1;
+}
+
+function formatCountdown(ms){
+  const s =
+    Math.max(0,Math.floor(ms/1000));
+
+  const d = Math.floor(s/86400);
+  const h = Math.floor((s%86400)/3600);
+  const m = Math.floor((s%3600)/60);
+  const sec = s%60;
+
+  if(d > 0)
+    return d+"d "+h+"h";
+
+  if(h > 0)
+    return h+"h "+m+"m";
+
+  return m+"m "+sec+"s";
+}
+
+function formatMatchTime(date){
+  return date.toLocaleTimeString([],{
+    hour:"numeric",
+    minute:"2-digit"
+  });
+}
+
+function getOptionLabel(f){
+  const m = matchTimeMap[f];
+
+  const saved = getSavedFiles();
+
+  const tick =
+    saved[f] ? " ✅" : "";
+
+  if(!m)
+    return f + tick;
+
+  const now = new Date();
+
+  const start =
+    new Date(m.start);
+
+  const end =
+    new Date(
+      start.getTime() +
+      Number(m.duration||0)*3600000
+    );
+
+  const matchTime =
+    formatMatchTime(start);
+
+  if(now < start)
+    return f +
+      " — Starts in " +
+      formatCountdown(start-now) +
+      " / " +
+      matchTime +
+      tick;
+
+  if(now >= start && now <= end)
+    return f + " — LIVE / " + matchTime + tick;
+
+  return f + " — Over / " + matchTime + tick;
+}
+
+/* Populate */
+function populateFiles(files){
+  const sel =
+    document.getElementById("file");
+
+  const cur = sel.value;
+
+  const sorted =
+    files.slice().sort(
+      (a,b)=>
+      getFileSortTime(a) -
+      getFileSortTime(b) ||
+      a.localeCompare(b)
+    );
+
+  sel.innerHTML = "";
+
+  if(!sorted.length){
+    sel.innerHTML =
+      '<option value="">No files found</option>';
+
+    updateEditorTitle();
+
+    return;
+  }
+
+  sorted.forEach(f=>{
+    const o =
+      document.createElement("option");
+
+    o.value = f;
+
+    o.textContent =
+      getOptionLabel(f);
+
+    sel.appendChild(o);
+  });
+
+  if(sorted.includes(cur))
+    sel.value = cur;
+
+  updateEditorTitle();
+  updateMatchBadge();
+  setAutoCommit();
+}
+
+/* Filter */
+function filterFiles(){
+  const q =
+    document.getElementById("searchFile")
+    .value.toLowerCase();
+
+  populateFiles(
+    allFiles.filter(
+      f => f.toLowerCase().includes(q)
+    )
+  );
+}
+
+/* Press Enter in filter to load selected filtered file */
+function handleFilterEnter(event){
+  if(event.key !== "Enter")
+    return;
+
+  event.preventDefault();
+
+  const sel =
+    document.getElementById("file");
+
+  const f = sel.value;
+
+  if(!f ||
+     f.includes("Loading") ||
+     f.includes("No files")){
+    setStatus(
+      "No matching file to load",
+      "error"
+    );
+
+    return;
+  }
+
+  setAutoCommit();
+  loadFile();
+}
+
+/* Badge */
+function updateMatchBadge(){
+  const badge =
+    document.getElementById("matchBadge");
+
+  const f =
+    document.getElementById("file").value;
+
+  if(!f || !matchTimeMap[f]){
+    badge.innerHTML = "";
+    return;
+  }
+
+  const m = matchTimeMap[f];
+
+  const now = new Date();
+
+  const start =
+    new Date(m.start);
+
+  const end =
+    new Date(
+      start.getTime() +
+      Number(m.duration)*3600000
+    );
+
+  const matchTime =
+    formatMatchTime(start);
+
+  if(now >= start && now <= end){
+    badge.innerHTML =
+      '<span class="match-badge badge-live">Live now / ' +
+      matchTime +
+      '</span>';
+  }else if(now < start){
+    badge.innerHTML =
+      `<span class="match-badge badge-soon">Starts in ${formatCountdown(start-now)} / ${matchTime}</span>`;
+  }else{
+    badge.innerHTML =
+      '<span class="match-badge badge-over">Ended / ' +
+      matchTime +
+      '</span>';
+  }
+}
+
+/* Title */
+function updateEditorTitle(){
+  const f =
+    document.getElementById("file").value;
+
+  const saved =
+    getSavedFiles();
+
+  const el =
+    document.getElementById("editorTitle");
+
+  if(!f ||
+    f.includes("Loading") ||
+    f.includes("No files")){
+    el.innerText = "—";
+    return;
+  }
+
+  el.innerText =
+    saved[f]
+    ? f + " · saved " +
+      timeAgo(saved[f]) +
+      " ✅"
+    : f;
+}
+
+/* Lines */
+function updateLineNumbers(){
+  const e =
+    document.getElementById("editor");
+
+  document.getElementById("lineNumbers")
+  .textContent =
+    Array.from(
+      {length:e.value.split("\n").length},
+      (_,i)=>i+1
+    ).join("\n");
+}
+
+function syncScroll(){
+  document.getElementById("lineNumbers")
+  .scrollTop =
+    document.getElementById("editor")
+    .scrollTop;
+}
+
+/* JSON */
+function getJsonErrorLine(err,text){
+  const m =
+    err.message.match(/position (\d+)/i);
+
+  if(m){
+    const lines =
+      text.slice(0,Number(m[1]))
+      .split("\n");
+
+    return {
+      line:lines.length,
+      column:
+        lines[lines.length-1].length+1,
+      message:err.message
+    };
+  }
+
+  return {
+    line:null,
+    column:null,
+    message:err.message
+  };
+}
+
+function validateJsonLive(){
+  const text =
+    document.getElementById("editor")
+    .value.trim();
+
+  if(!text){
+    setStatus("Empty","info");
+    return false;
+  }
+
+  try{
+    JSON.parse(text);
+
+    setStatus("Valid JSON","success");
+
+    return true;
+  }catch(e){
+    const err =
+      getJsonErrorLine(e,text);
+
+    setStatus(
+      err.line
+      ? "Error on line " +
+        err.line +
+        ", col " +
+        err.column
+      : "Invalid JSON",
+      "error"
+    );
+
+    return false;
+  }
+}
+
+/* Helpers */
+function extractMatches(d){
+  if(Array.isArray(d))
+    return d;
+
+  return d.matches ||
+         d.data ||
+         d.events ||
+         [];
+}
+
+function extractJsonFile(url){
+  if(!url)
+    return null;
+
+  try{
+    const u = new URL(url);
+
+    const s =
+      u.searchParams.get("yosintv");
+
+    return s
+      ? s.trim()
+          .replace(/\.json$/i,"")
+          + ".json"
+      : null;
+  }catch{
+    return null;
+  }
+}
+
+function saveMatchTime(f,item){
+  if(!f ||
+     !item.start ||
+     !item.duration)
+    return;
+
+  matchTimeMap[f] = {
+    start:item.start,
+    duration:Number(item.duration),
+    team1:item.team1||item.home||"",
+    team2:item.team2||item.away||""
+  };
+}
+
+/* Load list */
+async function loadFileList(){
+  setStatus(
+    "Loading files...",
+    "info"
+  );
+
+  try{
+    const found =
+      new Set();
+
+    for(const api of SOURCE_APIS){
+      const res =
+        await fetch(api);
+
+      if(!res.ok)
+        throw new Error(
+          "API error: " + api
+        );
+
+      extractMatches(
+        await res.json()
+      ).forEach(item=>{
+        const f =
+          extractJsonFile(
+            item.details_url
+          );
+
+        if(f){
+          found.add(f);
+          saveMatchTime(f,item);
+        }
+      });
+    }
+
+    allFiles =
+      Array.from(found)
+      .sort(
+        (a,b)=>
+        getFileSortTime(a) -
+        getFileSortTime(b)
+      );
+
+    populateFiles(allFiles);
+
+    setStatus(
+      allFiles.length +
+      " files loaded",
+      "success"
+    );
+
+    if(allFiles.length)
+      loadFile();
+  }catch(e){
+    setStatus(
+      e.message,
+      "error"
+    );
+  }
+}
+
+/* Change */
+function onFileChange(){
+  updateEditorTitle();
+  updateMatchBadge();
+  setAutoCommit();
+  loadFile();
+}
+
+/* Load */
+async function loadFile(){
+  const f =
+    document.getElementById("file")
+    .value;
+
+  if(!f ||
+     f.includes("Loading") ||
+     f.includes("No files"))
+    return;
+
+  setStatus(
+    "Loading " + f + "...",
+    "info"
+  );
+
+  try{
+    const res =
+      await fetch(
+        `${API_URL}?path=${encodeURIComponent(f)}&password=${encodeURIComponent(password)}`
+      );
+
+    const data =
+      await res.json();
+
+    if(!res.ok)
+      throw new Error(
+        data.message ||
+        data.error ||
+        "Load failed"
+      );
+
+    document.getElementById("editor")
+    .value =
+      JSON.stringify(
+        data.content,
+        null,
+        2
+      );
+
+    updateLineNumbers();
+    validateJsonLive();
+
+    setStatus(
+      "Loaded: " + f,
+      "success"
+    );
+  }catch(e){
+    setStatus(
+      e.message,
+      "error"
+    );
+  }
+}
+
+/* Save */
+async function saveFile(){
+  const f =
+    document.getElementById("file")
+    .value;
+
+  const editor =
+    document.getElementById("editor");
+
+  if(!f ||
+     f.includes("Loading")){
+    setStatus(
+      "Select a file first",
+      "error"
+    );
+
+    return;
+  }
+
+  const commitMessage =
+    document.getElementById("commitMessage")
+    .value.trim()
+    || makeAutoCommitMessage(f);
+
+  let content;
+
+  try{
+    content =
+      JSON.parse(editor.value);
+  }catch(e){
+    const err =
+      getJsonErrorLine(
+        e,
+        editor.value
+      );
+
+    setStatus(
+      err.line
+      ? "JSON error on line " +
+        err.line
+      : "Invalid JSON — cannot save",
+      "error"
+    );
+
+    return;
+  }
+
+  setSaveButtonState("saving");
+
+  setStatus(
+    "Saving...",
+    "info"
+  );
+
+  try{
+    const res =
+      await fetch(API_URL,{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          password,
+          path:f,
+          content,
+          message:commitMessage
+        })
+      });
+
+    const data =
+      await res.json();
+
+    if(!res.ok)
+      throw new Error(
+        data.message ||
+        data.error ||
+        "Save failed"
+      );
+
+    markFileSaved(f);
+
+    populateFiles(allFiles);
+
+    updateEditorTitle();
+
+    setAutoCommit();
+
+    updateLineNumbers();
+
+    validateJsonLive();
+
+    setSaveButtonState("saved");
+
+    setStatus(
+      "Saved: " + f,
+      "success"
+    );
+  }catch(e){
+    setSaveButtonState("normal");
+
+    setStatus(
+      e.message,
+      "error"
+    );
+  }
+}
+
+/* Toolbar */
+function formatJson(){
+  try{
+    const e =
+      document.getElementById("editor");
+
+    e.value =
+      JSON.stringify(
+        JSON.parse(e.value),
+        null,
+        2
+      );
+
+    updateLineNumbers();
+
+    validateJsonLive();
+
+    setStatus(
+      "Formatted",
+      "success"
+    );
+  }catch(e){
+    setStatus(
+      "Invalid JSON",
+      "error"
+    );
+  }
+}
+
+function clearEditor(){
+  document.getElementById("editor")
+  .value = "";
+
+  updateLineNumbers();
+
+  setStatus(
+    "Cleared",
+    "info"
+  );
+}
+
+function logout(){
+  localStorage.removeItem(
+    "blog_admin_password"
+  );
+
+  window.location.href =
+    "/admin/login.html";
+}
+
+/* Intervals */
+setInterval(
+  updateEditorTitle,
+  30000
+);
+
+setInterval(
+  updateMatchBadge,
+  1000
+);
+
+setInterval(
+  ()=>populateFiles(allFiles),
+  30000
+);
+
+/* Init */
+updateLineNumbers();
+loadFileList();
+</script>
+
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"5243eba8b920487aaf6c8ac211a9ad54","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
