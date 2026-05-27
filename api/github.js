@@ -5,8 +5,8 @@ export default async function handler(req, res) {
 
   if (req.method === "OPTIONS") return res.status(200).end();
 
-  const owner = process.env.GITHUB_OWNER || "yosintv2";
-  const repo = process.env.GITHUB_REPO || "blog";
+  const owner = process.env.GITHUB_OWNER || "yosintv";
+  const repo = process.env.GITHUB_REPO || "login";
   const branch = process.env.GITHUB_BRANCH || "main";
   
   const token = String(process.env.GITHUB_TOKEN || "").trim();
