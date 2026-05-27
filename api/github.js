@@ -5,16 +5,29 @@ export default async function handler(req, res) {
 
   if (req.method === "OPTIONS") return res.status(200).end();
 
-  const owner = "yosintv2";
-  const repo = "blog";
-  const branch = "main";
-  const token = process.env.GITHUB_TOKEN;
-  const adminPassword = process.env.ADMIN_PASSWORD;
+  const owner = process.env.GITHUB_OWNER || "yosintv2";
+  const repo = process.env.GITHUB_REPO || "blog";
+  const branch = process.env.GITHUB_BRANCH || "main";
+  
+  const token = String(process.env.GITHUB_TOKEN || "").trim();
+  const adminPassword = String(process.env.ADMIN_PASSWORD || "").trim();
 
   const password =
     req.method === "GET"
-      ? req.query.password
-      : req.body?.password;
+      ? String(req.query.password || "").trim()
+      : String(req.body?.password || "").trim();
+
+  if (!adminPassword) {
+    return res.status(500).json({
+      error: "ADMIN_PASSWORD is missing"
+    });
+  }
+
+  if (!token) {
+    return res.status(500).json({
+      error: "GITHUB_TOKEN is missing"
+    });
+  }
 
   if (password !== adminPassword) {
     return res.status(401).json({ error: "Wrong password" });
@@ -34,6 +47,11 @@ export default async function handler(req, res) {
       );
 
       const data = await r.json();
+      
+      // If the repo is new or the folder doesn't exist, GitHub returns 404.
+      // We treat this as an empty list so the login/app still works.
+      if (r.status === 404) return res.status(200).json({ files: [] });
+      
       if (!r.ok) return res.status(r.status).json(data);
 
       const files = data
@@ -45,7 +63,7 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "GET") {
-      const path = req.query.path;
+      const path = String(req.query.path || "").trim();
 
       const r = await fetch(
         `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`,
@@ -73,6 +91,10 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "POST") {
+      if (!req.body) {
+        return res.status(400).json({ error: "Missing request body" });
+      }
+
       const { path, content, message } = req.body;
 
       const current = await fetch(

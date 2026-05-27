@@ -55,7 +55,7 @@ button{
   <h1>YoSinTV Admin</h1>
   <p>Enter admin password to continue.</p>
 
-  <input type="password" id="password" placeholder="Admin Password">
+  <input type="password" id="password" placeholder="Admin Password" onkeyup="if(event.key==='Enter')login()">
   <button onclick="login()">Login</button>
 
   <div id="msg"></div>
@@ -80,14 +80,17 @@ async function login(){
       `/api/github?action=list&password=${encodeURIComponent(password)}`
     );
 
-    const data = await res.json();
+    let data = {};
+    try {
+      data = await res.json();
+    } catch(e) { /* fallback for non-json errors */ }
 
     if(!res.ok){
       throw new Error(data.error || data.message || "Login failed");
     }
 
     localStorage.setItem("blog_admin_password", password);
-    window.location.href = "/admin/";
+    window.location.href = "./index.html";
 
   }catch(e){
     msg.innerText = "❌ " + e.message;

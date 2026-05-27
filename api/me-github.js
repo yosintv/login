@@ -7,10 +7,10 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const owner = "yosintv2";
-  const repo = "blog";
-  const branch = "main";
-  const folder = "me";
+  const owner = process.env.GITHUB_OWNER || "yosintv2";
+  const repo = process.env.GITHUB_REPO || "blog";
+  const branch = process.env.GITHUB_BRANCH || "main";
+  const folder = process.env.GITHUB_FOLDER || "me";
 
   const token = String(process.env.GITHUB_TOKEN || "").trim();
   const adminPassword = String(process.env.ADMIN_PASSWORD || "").trim();
@@ -112,6 +112,12 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "POST") {
+      if (!req.body) {
+        return res.status(400).json({
+          error: "Missing request body"
+        });
+      }
+
       const file = String(req.body?.file || "").trim();
       const content = String(req.body?.content ?? "");
       const message = String(req.body?.message || "").trim();
