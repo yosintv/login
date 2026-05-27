@@ -16,8 +16,10 @@ export async function onRequest(context) {
   const owner = env.GITHUB_OWNER || "yosintv2";
   const repo = env.GITHUB_REPO || "blog";
   const branch = env.GITHUB_BRANCH || "main";
-  const token = String(env.GITHUB_TOKEN || "").trim();
-  const adminPassword = String(env.ADMIN_PASSWORD || "").trim();
+  
+  // Safely retrieve environment variables from Cloudflare context
+  const token = (env.GITHUB_TOKEN || "").toString().trim();
+  const adminPassword = (env.ADMIN_PASSWORD || "").toString().trim();
 
   let password = url.searchParams.get("password") || "";
   let body = {};
@@ -29,13 +31,19 @@ export async function onRequest(context) {
     } catch (e) {}
   }
 
+  // Debugging logs - REMOVE THESE IN PRODUCTION
+  console.log("Admin Password (from env):", adminPassword);
+  console.log("Received Password (from request):", password);
+
+  // Validation of server-side configuration
   if (!adminPassword) {
-    return new Response(JSON.stringify({ error: "ADMIN_PASSWORD is missing" }), { status: 500, headers: corsHeaders });
+    return new Response(JSON.stringify({ error: "Server Error: ADMIN_PASSWORD is not set in Cloudflare dashboard." }), { status: 500, headers: corsHeaders });
   }
   if (!token) {
-    return new Response(JSON.stringify({ error: "GITHUB_TOKEN is missing" }), { status: 500, headers: corsHeaders });
+    return new Response(JSON.stringify({ error: "Server Error: GITHUB_TOKEN is not set in Cloudflare dashboard." }), { status: 500, headers: corsHeaders });
   }
-  if (password.trim() !== adminPassword) {
+
+  if (!password || password.trim() !== adminPassword) {
     return new Response(JSON.stringify({ error: "Wrong password" }), { status: 401, headers: corsHeaders });
   }
 

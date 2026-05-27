@@ -29,18 +29,18 @@
         const errorMsg = document.getElementById('error-msg');
 
         async function handleLogin() {
-            const password = passwordInput.value;
+            const password = passwordInput.value.trim();
             if (!password) return;
             
             errorMsg.textContent = "Verifying...";
             try {
-                // We test the password by attempting to list files from the API
+                // Ensure your Cloudflare Function is at /functions/api/github.js
                 const res = await fetch(`/api/github?action=list&password=${encodeURIComponent(password)}`);
                 const data = await res.json();
-                if (res.ok) {
+                if (res.ok && data.files) {
                     localStorage.setItem('blog_admin_password', password);
                     alert("Login Successful!");
-                    // window.location.href = '/dashboard.html'; 
+                    // window.location.href = 'dashboard.html'; 
                 } else {
                     errorMsg.textContent = data.error || "Authentication failed";
                 }
